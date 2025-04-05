@@ -1,0 +1,19 @@
+package com.example.bussinessshope.security.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class RegisterSellerRequest {
+
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String password;
+    private String username;
+}

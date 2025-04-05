@@ -1,0 +1,63 @@
+package com.example.bussinessshope.product.service;
+
+import com.example.bussinessshope.business.entity.BusinessEntity;
+import com.example.bussinessshope.business.repository.BusinessRepository;
+import com.example.bussinessshope.product.dto.ProductRequestDto;
+import com.example.bussinessshope.product.dto.ProductResponseDto;
+import com.example.bussinessshope.product.dto.ProductUpdateDto;
+import com.example.bussinessshope.product.entity.ProductEntity;
+import com.example.bussinessshope.product.repository.ProductRepository;
+import com.example.bussinessshope.shared.exception.UnauthorizedException;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ProductService {
+    private final ProductRepository productRepository;
+    private final BusinessRepository businessRepository;
+    private final ModelMapper modelMapper;
+
+    @Autowired
+    public ProductService(ProductRepository productRepository, BusinessRepository businessRepository, ModelMapper modelMapper) {
+        this.productRepository = productRepository;
+        this.businessRepository = businessRepository;
+        this.modelMapper = modelMapper;
+    }
+
+    @Transactional
+    public ProductResponseDto addProduct(Long userId, ProductRequestDto productRequestDto) {
+        BusinessEntity business = businessRepository.findByIdAndUserId(productRequestDto.getBusinessId(), userId)
+                .orElseThrow(() -> new UnauthorizedException("User does not own this business"));
+
+        ProductEntity product = modelMapper.map(productRequestDto, ProductEntity.class);
+        product.setBusiness(business);
+        productRepository.save(product);
+        return modelMapper.map(product, ProductResponseDto.class);
+    }
+
+    @Transactional
+    public ProductResponseDto updateProduct(Long userId, Long productId, ProductUpdateDto productUpdateDto) {
+        ProductEntity product = productRepository.findByIdAndBusinessUserId(productId, userId)
+                .orElseThrow(() -> new UnauthorizedException("User does not own this product"));
+
+        if (productUpdateDto.getQuantity() != null) {
+            product.setQuantity(productUpdateDto.getQuantity());
+        }
+        if (productUpdateDto.getPrice() != null) {
+            product.setPrice(productUpdateDto.getPrice());
+        }
+
+        productRepository.save(product);
+        return modelMapper.map(product, ProductResponseDto.class);
+    }
+
+    @Transactional
+    public void softDeleteProduct(Long userId, Long productId) {
+        ProductEntity product = productRepository.findByIdAndBusinessUserId(productId, userId)
+                .orElseThrow(() -> new UnauthorizedException("User does not own this product"));
+
+        productRepository.delete(product);
+    }
+}
