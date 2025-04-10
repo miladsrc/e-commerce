@@ -1,7 +1,6 @@
 package com.example.bussinessshope.config;
 
 
-import com.example.bussinessshope.user.entity.UserEntity;
 import com.example.bussinessshope.user.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +28,9 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findUserByEmail(username)
+        return username -> userRepository.findUserEntityByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("UserEntity not found"));
     }
-
 
     @Bean
     public AuthenticationProvider authenticationProvider() {

@@ -41,16 +41,16 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String authorizationHeader = httpRequest.getHeader("Authorization");
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-            final String userEmail = jwtService.extractUsername(token);
+            String token = authorizationHeader.substring(7);
+            final String username = jwtService.extractUsername(token);
 
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 if (jwtService.isTokenValid(token, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails,
-                                    null, // No credentials
+                                    null,
                                     userDetails.getAuthorities()
                             );
                     authToken.setDetails(

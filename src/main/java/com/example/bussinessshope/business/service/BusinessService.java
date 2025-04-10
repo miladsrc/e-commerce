@@ -50,9 +50,9 @@ public class BusinessService {
 
     public BusinessResponseDto createBusiness(
             BusinessCreateDto businessCreateDto,
-            long userId) {
+            String username) {
 
-        UserEntity user = userRepository.findById(userId)
+        UserEntity user = userRepository.findUserEntityByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found!"));
         BusinessEntity businessEntity = modelMapper.map(businessCreateDto, BusinessEntity.class);
         businessEntity.setUser(user);

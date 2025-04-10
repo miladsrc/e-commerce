@@ -17,9 +17,8 @@ import lombok.*;
 @AllArgsConstructor
 public class AuthenticationRequest {
 
-    @NotBlank(message = "Email cannot be empty.")
-    @Email(message = "Invalid email format.")
-    private String email;
+    @NotBlank(message = "username cannot be empty.")
+    private String username;
 
     @NotBlank(message = "Password cannot be empty.")
     @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters.")

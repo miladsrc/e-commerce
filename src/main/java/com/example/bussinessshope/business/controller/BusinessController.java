@@ -53,8 +53,8 @@ public class BusinessController {
             @RequestHeader("Authorization") String token,
             @RequestBody @Valid BusinessCreateDto businessCreateDto) {
 
-        Long userId = jwtService.extractUserId(token.substring(7));
-        BusinessResponseDto responseDto = businessService.createBusiness(businessCreateDto, userId);
+        String username = jwtService.extractUsername(token.substring(7));
+        BusinessResponseDto responseDto = businessService.createBusiness(businessCreateDto, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 

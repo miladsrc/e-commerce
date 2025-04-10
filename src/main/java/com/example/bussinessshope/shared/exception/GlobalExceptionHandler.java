@@ -63,6 +63,26 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handelUnAuthorizedException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
     }
+
+    @ExceptionHandler(EncryptionException.class)
+    public ResponseEntity<ErrorResponse> handelEncryptionException(EncryptionException ex){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                ex.getMessage(),
+                "Encryption not completed!"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(DecryptionException.class)
+    public ResponseEntity<ErrorResponse> handelDecryptionException(DecryptionException ex){
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                ex.getMessage(),
+                "Decryption not completed!"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
 
 

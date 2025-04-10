@@ -65,11 +65,11 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         authenticationManager.authenticate(
            new UsernamePasswordAuthenticationToken(
-                   authenticationRequest.getEmail(),
+                   authenticationRequest.getUsername(),
                    authenticationRequest.getPassword()
            )
         );
-        var user = userRepository.findUserByEmail(authenticationRequest.getEmail())
+        var user = userRepository.findUserEntityByUsernameAndPassword(authenticationRequest.getUsername(), authenticationRequest.getPassword())
                 .orElseThrow(() -> new UsernameNotFoundException("UserEntity not found"));
 
         var token = jwtService.generateToken(user);
