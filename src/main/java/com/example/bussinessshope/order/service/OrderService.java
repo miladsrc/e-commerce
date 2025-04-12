@@ -66,7 +66,6 @@ public class OrderService {
 
         List<ProductEntity> requestedProducts = orderUpdateDto.getProductList();
 
-        // بررسی موجودی محصول‌ها
         Map<Long, Integer> insufficientProducts = new HashMap<>();
         for (ProductEntity requestedProduct : requestedProducts) {
             ProductEntity productInDb = productRepository.findById(requestedProduct.getId())

@@ -15,7 +15,8 @@ import java.util.Optional;
 public interface BusinessRepository extends JpaRepository<BusinessEntity, Long > {
 
     List<BusinessEntity> findAllByUserId(long id);
-    Optional<BusinessEntity> findByIdAndUserId(Long id, Long userId);
+    @Query(value = "SELECT * FROM business WHERE id = :businessId AND user_id_fk = :userId", nativeQuery = true)
+    Optional<BusinessEntity> findByIdAndUserId(@Param("businessId") Long businessId, @Param("userId") Long userId);
     @Transactional
     @Modifying
     @Query(value = "UPDATE business SET deleted = true WHERE id = :id", nativeQuery = true)
