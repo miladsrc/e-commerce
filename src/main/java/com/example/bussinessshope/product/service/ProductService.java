@@ -2,9 +2,7 @@ package com.example.bussinessshope.product.service;
 
 import com.example.bussinessshope.business.entity.BusinessEntity;
 import com.example.bussinessshope.business.repository.BusinessRepository;
-import com.example.bussinessshope.product.dto.ProductRequestDto;
-import com.example.bussinessshope.product.dto.ProductResponseDto;
-import com.example.bussinessshope.product.dto.ProductUpdateDto;
+import com.example.bussinessshope.product.dto.*;
 import com.example.bussinessshope.product.entity.ProductEntity;
 import com.example.bussinessshope.product.repository.ProductRepository;
 import com.example.bussinessshope.shared.exception.UnauthorizedException;
@@ -12,6 +10,10 @@ import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -30,10 +32,17 @@ public class ProductService {
     public ProductResponseDto addProduct(Long userId, ProductRequestDto productRequestDto) {
         BusinessEntity business = businessRepository.findByIdAndUserId(productRequestDto.getBusinessId(), userId)
                 .orElseThrow(() -> new UnauthorizedException("User does not own this business"));
-
-        ProductEntity product = modelMapper.map(productRequestDto, ProductEntity.class);
-        product.setBusiness(business);
-        productRepository.save(product);
+        if (business.getProductList() == null) {
+            business.setProductList(new ArrayList<>());
+        }
+        ProductEntity product = ProductEntity.builder()
+                .business(business)
+                .name(productRequestDto.getName())
+                .quantity(productRequestDto.getQuantity())
+                .price(productRequestDto.getPrice())
+                .orders(new ArrayList<>())
+                .build();
+        productRepository.saveAndFlush(product);
         return modelMapper.map(product, ProductResponseDto.class);
     }
 
@@ -60,4 +69,27 @@ public class ProductService {
 
         productRepository.delete(product);
     }
+
+    @Transactional
+    public ProductResponseDto updatePrice(Long userId, Long productId, ProductUpdatePriceDto dto) {
+        ProductEntity product = productRepository.findByIdAndBusinessUserId(productId, userId)
+                .orElseThrow(() -> new UnauthorizedException("User does not own this product"));
+
+        product.setPrice(dto.getPrice());
+        productRepository.save(product);
+
+        return modelMapper.map(product, ProductResponseDto.class);
+    }
+
+    @Transactional
+    public ProductResponseDto updateQuantity(Long userId, Long productId, ProductUpdateQuantityDto dto) {
+        ProductEntity product = productRepository.findByIdAndBusinessUserId(productId, userId)
+                .orElseThrow(() -> new UnauthorizedException("User does not own this product"));
+
+        product.setQuantity(dto.getQuantity());
+        productRepository.save(product);
+
+        return modelMapper.map(product, ProductResponseDto.class);
+    }
+
 }

@@ -1,6 +1,5 @@
 package com.example.bussinessshope.product.dto;
 
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductUpdateDto {
+public class ProductUpdateQuantityDto {
     @Min(0)
     private Integer quantity;
-    @DecimalMin(value = "0.0", inclusive = false)
-    private Double price;
 }

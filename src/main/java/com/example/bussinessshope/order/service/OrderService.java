@@ -66,7 +66,6 @@ public class OrderService {
 
         List<ProductEntity> requestedProducts = orderUpdateDto.getProductList();
 
-        // بررسی موجودی محصول‌ها
         Map<Long, Integer> insufficientProducts = new HashMap<>();
         for (ProductEntity requestedProduct : requestedProducts) {
             ProductEntity productInDb = productRepository.findById(requestedProduct.getId())
@@ -77,12 +76,10 @@ public class OrderService {
             }
         }
 
-        // اگر محصولی موجودی کافی نداشت، Exception بده
         if (!insufficientProducts.isEmpty()) {
             throw new InsufficientProductStockException(insufficientProducts);
         }
 
-        // اگر مشکلی نبود، لیست محصولات را بروزرسانی کن
         List<ProductEntity> existingProducts = order.getProductList();
         existingProducts.removeIf(product -> !requestedProducts.contains(product));
         for (ProductEntity product : requestedProducts) {
