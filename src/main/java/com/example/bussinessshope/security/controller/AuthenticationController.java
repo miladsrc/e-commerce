@@ -26,17 +26,20 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register/seller")
-    public ResponseEntity<AuthenticationResponse> registerUser(@Valid @RequestBody RegisterSellerRequest request) {
+    public ResponseEntity<AuthenticationResponse> registerUser(
+            @RequestBody @Valid  RegisterSellerRequest request) {
         return ResponseEntity.ok(authenticationService.registerUser(request));
     }
 
     @PostMapping("/register/customer")
-    public ResponseEntity<AuthenticationResponse> registerCustomer(@Valid @RequestBody RegisterCustomerRequest request) {
+    public ResponseEntity<AuthenticationResponse> registerCustomer(
+            @RequestBody @Valid  RegisterCustomerRequest request) {
         return ResponseEntity.ok(authenticationService.registerCustomer(request));
     }
 
     @PostMapping("/authenticate/user")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationResponse> authenticate(
+            @RequestBody @Valid  AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
     }
 }

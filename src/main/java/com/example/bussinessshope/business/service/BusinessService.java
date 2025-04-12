@@ -5,7 +5,6 @@ import com.example.bussinessshope.business.dto.BusinessResponseDto;
 import com.example.bussinessshope.business.dto.BusinessUpdateDto;
 import com.example.bussinessshope.business.entity.BusinessEntity;
 import com.example.bussinessshope.business.repository.BusinessRepository;
-import com.example.bussinessshope.shared.exception.BusinessCreationException;
 import com.example.bussinessshope.shared.exception.BusinessNotFoundException;
 import com.example.bussinessshope.shared.exception.UserIsNotOwnerOfBusiness;
 import com.example.bussinessshope.shared.exception.UserNotFoundException;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,7 +37,6 @@ public class BusinessService {
         this.modelMapper = modelMapper;
     }
 
-    @Transactional
     public List<BusinessResponseDto> getBusinessByUserId(
             Long id) {
 
@@ -60,20 +59,17 @@ public class BusinessService {
         return modelMapper.map(savedBusiness, BusinessResponseDto.class);
     }
 
-
-    @Transactional
     public BusinessResponseDto getBusinessById(
             Long userId,
             Long businessId) {
 
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
         BusinessEntity businessEntity = businessRepository.findById(businessId)
                 .orElseThrow(() -> new BusinessNotFoundException("Business doesn't exist!"));
-        businessEntity.setUser(user);
-        if (!businessEntity.getUser().getId().equals(userId)){
-            throw new UserIsNotOwnerOfBusiness("user is not owner of business ");
+        Long businessUserId = businessEntity.getUser().getId();
+        if (!businessUserId.equals(userId)){
+            throw new UserIsNotOwnerOfBusiness("User is not owner of business ");
         }
+
         return modelMapper.map(businessEntity, BusinessResponseDto.class);
     }
 
@@ -85,19 +81,30 @@ public class BusinessService {
 
         BusinessEntity businessEntity = businessRepository.findById(businessId)
                 .orElseThrow(() -> new BusinessNotFoundException("Business not found!"));
-
         if (!businessEntity.getUser().getId().equals(userId)) {
             throw new UserIsNotOwnerOfBusiness("User is not the owner of the business.");
         }
-        businessEntity.setName(businessUpdateDto.getName());
-        businessEntity.setEmail(businessUpdateDto.getEmail());
-        businessEntity.setPhoneNumber(businessUpdateDto.getPhoneNumber());
-        businessEntity.setAddressList(businessUpdateDto.getAddressList());
-        businessEntity.setProductList(businessUpdateDto.getProductList());
-        businessRepository.save(businessEntity);
-        return modelMapper.map(businessEntity, BusinessResponseDto.class);
+        if (!Objects.equals(businessEntity.getName(), businessUpdateDto.getName())) {
+            businessEntity.setName(businessUpdateDto.getName());
+        }
+        if (!Objects.equals(businessEntity.getEmail(), businessUpdateDto.getEmail())) {
+            businessEntity.setEmail(businessUpdateDto.getEmail());
+        }
+        if (!Objects.equals(businessEntity.getPhoneNumber(), businessUpdateDto.getPhoneNumber())) {
+            businessEntity.setPhoneNumber(businessUpdateDto.getPhoneNumber());
+        }
+        if (!Objects.equals(businessEntity.getAddressList(), businessUpdateDto.getAddressList())) {
+            businessEntity.setAddressList(businessUpdateDto.getAddressList());
+        }
+        if (!Objects.equals(businessEntity.getProductList(), businessUpdateDto.getProductList())) {
+            businessEntity.setProductList(businessUpdateDto.getProductList());
+        }
+        BusinessEntity updatedBusiness = businessRepository.save(businessEntity);
+        return modelMapper.map(updatedBusiness, BusinessResponseDto.class);
     }
 
+
+    @Transactional
     public void deleteBusiness(long userId, long businessId){
 
         BusinessEntity businessEntity = businessRepository.findById(businessId)
@@ -105,10 +112,11 @@ public class BusinessService {
         if (!businessEntity.getUser().getId().equals(userId)) {
             throw new UserIsNotOwnerOfBusiness("User is not the owner of the business.");
         }
-        businessRepository.deleteById(businessId);
+        businessRepository.softDeleteBusinessEntityById(businessId);
     }
 
     public List<BusinessResponseDto> getAllBusiness(){
+
         return businessRepository.findAll().stream()
                 .map(business -> modelMapper.map(business, BusinessResponseDto.class))
                 .collect(Collectors.toList());

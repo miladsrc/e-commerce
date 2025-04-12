@@ -2,6 +2,7 @@ package com.example.bussinessshope.order.controller;
 
 import com.example.bussinessshope.order.dto.OrderRequestDto;
 import com.example.bussinessshope.order.dto.OrderResponseDto;
+import com.example.bussinessshope.order.dto.OrderUpdateDto;
 import com.example.bussinessshope.order.service.OrderService;
 import com.example.bussinessshope.security.service.JwtService;
 import jakarta.validation.Valid;
@@ -25,30 +26,34 @@ public class OrderController {
     }
 
     @GetMapping("/current")
-    public ResponseEntity<OrderResponseDto> getCurrentOrder(@RequestHeader("Authorization") String token) {
-        Long userId = jwtService.extractUserId(token.substring(7));
+    public ResponseEntity<OrderResponseDto> getCurrentOrder(
+            @RequestHeader("Authorization") String key) {
+        Long userId = jwtService.extractUserIdFromToken(key);
         OrderResponseDto order = orderService.getCurrentOrder(userId);
         return ResponseEntity.ok(order);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<OrderResponseDto> updateOrder(@RequestHeader("Authorization") String token,
-                                                        @RequestBody @Valid OrderRequestDto orderRequestDto) {
-        Long userId = jwtService.extractUserId(token.substring(7));
-        OrderResponseDto updatedOrder = orderService.updateOrder(userId, orderRequestDto);
+    public ResponseEntity<OrderResponseDto> updateOrder(
+            @RequestHeader("Authorization") String key,
+            @RequestBody @Valid OrderUpdateDto orderUpdateDto) {
+        Long userId = jwtService.extractUserIdFromToken(key);
+        OrderResponseDto updatedOrder = orderService.updateOrder(userId, orderUpdateDto);
         return ResponseEntity.ok(updatedOrder);
     }
 
     @PostMapping("/finalize")
-    public ResponseEntity<OrderResponseDto> finalizeOrder(@RequestHeader("Authorization") String token) {
-        Long userId = jwtService.extractUserId(token.substring(7));
+    public ResponseEntity<OrderResponseDto> finalizeOrder(
+            @RequestHeader("Authorization") String key) {
+        Long userId = jwtService.extractUserIdFromToken(key);
         OrderResponseDto finalizedOrder = orderService.finalizeOrder(userId);
         return ResponseEntity.ok(finalizedOrder);
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<OrderResponseDto>> getOrderHistory(@RequestHeader("Authorization") String token) {
-        Long userId = jwtService.extractUserId(token.substring(7));
+    public ResponseEntity<List<OrderResponseDto>> getOrderHistory(
+            @RequestHeader("Authorization") String key) {
+        Long userId = jwtService.extractUserIdFromToken(key);
         List<OrderResponseDto> orderHistory = orderService.getOrderHistory(userId);
         return ResponseEntity.ok(orderHistory);
     }

@@ -35,7 +35,7 @@ public class ProductEntity {
     @ManyToMany(mappedBy = "productList")
     List<OrderEntity> orders;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "BUSINESS_ID_FK")
     BusinessEntity business;
 }
