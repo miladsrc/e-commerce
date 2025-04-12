@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@SoftDelete
+@SoftDelete(columnName = "DELETED")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,7 +35,7 @@ public class BusinessEntity {
     @Column(name = "PHONE_NUMBER", nullable = true, unique = true)
     String phoneNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "USER_ID_FK", nullable = false)
     UserEntity user;
 

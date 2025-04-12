@@ -1,6 +1,6 @@
 package com.example.bussinessshope.business.dto;
 
-import com.example.bussinessshope.product.entity.ProductEntity;
+import com.example.bussinessshope.product.dto.ProductResponseDto;
 import com.example.bussinessshope.shared.entity.Address;
 import lombok.*;
 
@@ -17,6 +17,6 @@ class BusinessResponseDto {
     String name;
     String email;
     String phoneNumber;
-    List<ProductEntity> productList;
+    List<ProductResponseDto> productList;
     List<Address> addressList;
 }

@@ -5,6 +5,7 @@ import com.example.bussinessshope.security.dto.AuthenticationRequest;
 import com.example.bussinessshope.security.dto.AuthenticationResponse;
 import com.example.bussinessshope.security.dto.RegisterCustomerRequest;
 import com.example.bussinessshope.security.dto.RegisterSellerRequest;
+import com.example.bussinessshope.security.entity.UserPrincipal;
 import com.example.bussinessshope.security.statics.Role;
 import com.example.bussinessshope.user.entity.UserEntity;
 import com.example.bussinessshope.user.repository.UserRepository;
@@ -37,7 +38,16 @@ public class AuthenticationService {
                 .role(Role.SELLER)
                 .build();
         userRepository.saveAndFlush(userEntity);
-        var token = jwtService.generateToken(userEntity);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(Math.toIntExact(userEntity.getId()))
+                .username(userEntity.getUsername())
+                .password(userEntity.getPassword())
+                .authorities(userEntity.getAuthorities())
+                .build();
+
+
+        var token = jwtService.generateToken(userPrincipal);
         return AuthenticationResponse.builder()
                 .token(token)
                 .build();
@@ -54,8 +64,17 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(Role.CUSTOMER)
                 .build();
+
         userRepository.saveAndFlush(userEntity);
-        var token = jwtService.generateToken(userEntity);
+
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(Math.toIntExact(userEntity.getId()))
+                .username(userEntity.getUsername())
+                .password(userEntity.getPassword())
+                .authorities(userEntity.getAuthorities())
+                .build();
+
+        var token = jwtService.generateToken(userPrincipal);
         return AuthenticationResponse.builder()
                 .token(token)
                 .build();
@@ -69,10 +88,17 @@ public class AuthenticationService {
                    authenticationRequest.getPassword()
            )
         );
-        var user = userRepository.findUserEntityByUsernameAndPassword(authenticationRequest.getUsername(), authenticationRequest.getPassword())
+        UserEntity userEntity = userRepository.findUserEntityByUsername(authenticationRequest.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("UserEntity not found"));
 
-        var token = jwtService.generateToken(user);
+        UserPrincipal userPrincipal = UserPrincipal.builder()
+                .id(Math.toIntExact(userEntity.getId()))
+                .username(userEntity.getUsername())
+                .password(userEntity.getPassword())
+                .authorities(userEntity.getAuthorities())
+                .build();
+
+        var token = jwtService.generateToken(userPrincipal);
         return AuthenticationResponse.builder()
                 .token(token)
                 .build();

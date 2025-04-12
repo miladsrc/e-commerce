@@ -40,7 +40,7 @@ public class OrderEntity {
     )
     List<ProductEntity> productList;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "USER_ID_FK", nullable = false)
     UserEntity user;
 

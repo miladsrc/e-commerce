@@ -28,63 +28,56 @@ public class BusinessController {
         this.jwtService = jwtService;
     }
 
-
     @GetMapping("/all")
     public ResponseEntity<List<BusinessResponseDto>> getAllByUserId(
-            @RequestHeader("Authorization") String token){
-
-        String jwt = token.substring(7);
-        Long id = jwtService.extractUserId(token);
-        List<BusinessResponseDto> userResponseDTOS = businessService.getBusinessByUserId(id);
+            @RequestHeader("Authorization") String key) {
+        Long userId = jwtService.extractUserIdFromToken(key);
+        List<BusinessResponseDto> userResponseDTOS = businessService.getBusinessByUserId(userId);
         return ResponseEntity.ok(userResponseDTOS);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get/all")
-    public ResponseEntity<List<BusinessResponseDto>> getAll(
-            @RequestHeader("Authorization") String token){
-
-        List<BusinessResponseDto> userResponseDTOS = (List<BusinessResponseDto>) businessService.getAllBusiness();
+    public ResponseEntity<List<BusinessResponseDto>> getAll() {
+        List<BusinessResponseDto> userResponseDTOS = businessService.getAllBusiness();
         return ResponseEntity.ok(userResponseDTOS);
     }
 
     @PostMapping("/create")
     public ResponseEntity<BusinessResponseDto> create(
-            @RequestHeader("Authorization") String token,
+            @RequestHeader("Authorization") String key,
             @RequestBody @Valid BusinessCreateDto businessCreateDto) {
-
-        String username = jwtService.extractUsername(token.substring(7));
+        String username = jwtService.extractUsername(jwtService.decryptToken(jwtService.extractToken(key)));
         BusinessResponseDto responseDto = businessService.createBusiness(businessCreateDto, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BusinessResponseDto> getById(
-            @RequestHeader("Authorization") String token,
+            @RequestHeader("Authorization") String key,
             @PathVariable Long id) {
-
-        Long userId = jwtService.extractUserId(token.substring(7));
+        Long userId = jwtService.extractUserIdFromToken(key);
         BusinessResponseDto businessResponseDto = businessService.getBusinessById(userId, id);
         return ResponseEntity.ok(businessResponseDto);
     }
 
     @PutMapping("/{businessId}")
     public ResponseEntity<BusinessResponseDto> update(
-            @RequestHeader("Authorization") String token,
+            @RequestHeader("Authorization") String key,
             @PathVariable Long businessId,
             @RequestBody @Valid BusinessUpdateDto businessUpdateDto) {
-
-        Long userId = jwtService.extractUserId(token.substring(7));
+        Long userId = jwtService.extractUserIdFromToken(key);
         BusinessResponseDto responseDto = businessService.updateBusiness(businessUpdateDto, businessId, userId);
         return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{businessId}")
-    public ResponseEntity.HeadersBuilder<?> delete(
-            @RequestHeader("Authorization") String token,
-            @PathVariable long businessId){
-        Long userId = jwtService.extractUserId(token.substring(7));
+    public ResponseEntity<Void> delete(
+            @RequestHeader("Authorization") String key,
+            @PathVariable Long businessId) {
+        Long userId = jwtService.extractUserIdFromToken(key);
         businessService.deleteBusiness(userId, businessId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
+

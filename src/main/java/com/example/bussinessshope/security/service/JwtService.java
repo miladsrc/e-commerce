@@ -1,9 +1,11 @@
 package com.example.bussinessshope.security.service;
 
+import com.example.bussinessshope.security.entity.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -22,13 +24,29 @@ public class JwtService {
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;
+
+    @Value("${aes.secret}")
+    private String AES_SECRET_KEY;
+
     @Value("${token.validity}")
-    private long TOKEN_VALIDITY; // 10 hours
-    @Value("${gmc.tag.length}")
-    private int GCM_TAG_LENGTH;
+    private long TOKEN_VALIDITY;
+
+    private static final int GCM_TAG_LENGTH = 128;
+    private static final int IV_LENGTH = 12;
+
+    @PostConstruct
+    private void validateKeys() {
+        if (SECRET_KEY == null || AES_SECRET_KEY == null) {
+            throw new IllegalStateException("Secret keys must not be null.");
+        }
+    }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, claims -> claims.get("username", String.class));
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Long.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -36,34 +54,27 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    public String generateToken(UserPrincipal userPrincipal) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("username", userPrincipal.getUsername());
+        extraClaims.put("id", userPrincipal.getId());
+
         String jwt = Jwts.builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY))
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
+
         return encrypt(jwt);
     }
 
-
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
     public Boolean isTokenValid(String token, UserDetails userDetails) {
+        if (token == null || token.isEmpty()) {
+            return false;
+        }
         final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
-
-    private Claims extractAllClaims(String token) {
-        String decryptedToken = decrypt(token);
-        return Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(decryptedToken)
-                .getPayload();
+        return username != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
 
@@ -71,12 +82,17 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
-    public Long extractUserId(String token) {
-        return extractClaim(token, claims -> claims.get("id", Long.class));
+    private Claims extractAllClaims(String token) {
+
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private SecretKey getAESKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(AES_SECRET_KEY);
         if (keyBytes.length != 16 && keyBytes.length != 24 && keyBytes.length != 32) {
             throw new IllegalArgumentException("Invalid AES key size. Must be 16, 24, or 32 bytes.");
         }
@@ -87,7 +103,7 @@ public class JwtService {
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             SecretKey key = getAESKey();
-            byte[] iv = new byte[12];
+            byte[] iv = new byte[IV_LENGTH];
             new SecureRandom().nextBytes(iv);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, parameterSpec);
@@ -101,13 +117,16 @@ public class JwtService {
         }
     }
 
-    private String decrypt(String encryptedData) {
+    public String decrypt(String encryptedData) {
         try {
-            byte[] decodedData = Base64.getDecoder().decode(encryptedData);
+            byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);
+            if (decodedBytes.length < IV_LENGTH) {
+                throw new IllegalArgumentException("Invalid encrypted data format");
+            }
+            byte[] iv = Arrays.copyOfRange(decodedBytes, 0, IV_LENGTH);
+            byte[] encryptedBytes = Arrays.copyOfRange(decodedBytes, IV_LENGTH, decodedBytes.length);
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             SecretKey key = getAESKey();
-            byte[] iv = Arrays.copyOfRange(decodedData, 0, 12);
-            byte[] encryptedBytes = Arrays.copyOfRange(decodedData, 12, decodedData.length);
             GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
             cipher.init(Cipher.DECRYPT_MODE, key, parameterSpec);
             byte[] decryptedData = cipher.doFinal(encryptedBytes);
@@ -122,4 +141,20 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public String extractToken(String key) {
+        if (key == null || !key.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid Authorization header.");
+        }
+        return key.substring(7);
+    }
+
+    public String decryptToken(String token) {
+        return decrypt(token);
+    }
+
+    public Long extractUserIdFromToken(String key) {
+        String token = extractToken(key);
+        String decryptedToken = decryptToken(token);
+        return extractUserId(decryptedToken);
+    }
 }
