@@ -5,6 +5,8 @@ import com.example.bussinessshope.business.dto.BusinessResponseDto;
 import com.example.bussinessshope.business.dto.BusinessUpdateDto;
 import com.example.bussinessshope.business.service.BusinessService;
 import com.example.bussinessshope.security.service.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/business")
+@SecurityRequirement(name = "bearerAuth")
 public class BusinessController {
 
     private final BusinessService businessService;
@@ -28,6 +31,7 @@ public class BusinessController {
         this.jwtService = jwtService;
     }
 
+    @Operation(summary = "Get all businesses by user ID", description = "Fetch all businesses for the authenticated user")
     @GetMapping("/all")
     public ResponseEntity<List<BusinessResponseDto>> getAllByUserId(
             @RequestHeader("Authorization") String key) {
@@ -36,6 +40,7 @@ public class BusinessController {
         return ResponseEntity.ok(userResponseDTOS);
     }
 
+    @Operation(summary = "Get all businesses", description = "Fetch all businesses for admin")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get/all")
     public ResponseEntity<List<BusinessResponseDto>> getAll() {
@@ -43,6 +48,7 @@ public class BusinessController {
         return ResponseEntity.ok(userResponseDTOS);
     }
 
+    @Operation(summary = "Create a new business", description = "Create a new business for the authenticated user")
     @PostMapping("/create")
     public ResponseEntity<BusinessResponseDto> create(
             @RequestHeader("Authorization") String key,
@@ -52,6 +58,7 @@ public class BusinessController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    @Operation(summary = "Get business by ID", description = "Fetch a specific business by its ID")
     @GetMapping("/{id}")
     public ResponseEntity<BusinessResponseDto> getById(
             @RequestHeader("Authorization") String key,
@@ -61,6 +68,7 @@ public class BusinessController {
         return ResponseEntity.ok(businessResponseDto);
     }
 
+    @Operation(summary = "Update a business", description = "Update a specific business by ID")
     @PutMapping("/{businessId}")
     public ResponseEntity<BusinessResponseDto> update(
             @RequestHeader("Authorization") String key,
@@ -71,6 +79,7 @@ public class BusinessController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "Delete a business", description = "Delete a specific business by ID")
     @DeleteMapping("/{businessId}")
     public ResponseEntity<Void> delete(
             @RequestHeader("Authorization") String key,
@@ -80,4 +89,5 @@ public class BusinessController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
+
 

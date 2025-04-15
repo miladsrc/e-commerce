@@ -1,8 +1,6 @@
 package com.example.bussinessshope.config;
 
-import com.example.bussinessshope.security.entity.UserPrincipal;
 import com.example.bussinessshope.security.service.JwtService;
-import com.example.bussinessshope.user.entity.UserEntity;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -13,7 +11,6 @@ import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+
 
 @Component
 public class JwtAuthenticationFilter extends GenericFilterBean {
@@ -38,9 +36,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                          @NonNull ServletResponse response,
                          @NonNull FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        if (isPublicEndpoint(((HttpServletRequest) request).getServletPath())) {
+            chain.doFilter(request, response);
+            return;
+        }
         String authorizationHeader = httpRequest.getHeader("Authorization");
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -72,6 +75,12 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         }
         chain.doFilter(request, response);
     }
-
+    private boolean isPublicEndpoint(String path) {
+        return path.startsWith("/api/auth") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/webjars") ||
+                path.startsWith("/swagger-resources");
+    }
 }
 
