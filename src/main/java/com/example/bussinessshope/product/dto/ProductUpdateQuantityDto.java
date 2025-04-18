@@ -11,6 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductUpdateQuantityDto {
-    @Min(0)
+    @Min(value = 0, message = "quantity cannot be equal to zero")
     private Integer quantity;
 }

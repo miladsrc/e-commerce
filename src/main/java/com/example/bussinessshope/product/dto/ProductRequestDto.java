@@ -12,12 +12,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductRequestDto {
-    @NotBlank
+    @NotBlank(message = "name cannot be blank")
     private String name;
-    @Min(0)
+    @Min(value = 0, message = "quantity cannot be less than 0")
     private Integer quantity;
-    @DecimalMin(value = "0.0", inclusive = false)
+    @DecimalMin(value = "0.0", inclusive = false, message = "minimum price of product cannot be equal to zero")
     private Double price;
-    @NotNull
+    @NotNull(message = "business id cannot be null")
     private Long businessId;
 }

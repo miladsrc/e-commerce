@@ -12,8 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductUpdateDto {
-    @Min(0)
+    @Min(value = 0, message = "quantity cannot be less than 0")
     private Integer quantity;
-    @DecimalMin(value = "0.0", inclusive = false)
+    @DecimalMin(value = "0.0", inclusive = false, message = "price cannot be zero")
     private Double price;
 }
