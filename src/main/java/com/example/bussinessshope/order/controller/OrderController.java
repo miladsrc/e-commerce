@@ -68,4 +68,15 @@ public class OrderController {
         List<OrderResponseDto> orderHistory = orderService.getOrderHistory(userId);
         return ResponseEntity.ok(orderHistory);
     }
+
+    @Operation(summary = "Remove a product from user's pending orders", description = "Deletes the specified product from all pending orders of the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Product removed from pending orders successfully")
+    @DeleteMapping("/pending/products/{productId}")
+    public ResponseEntity<Void> removeProductFromUserPendingOrders(
+            @RequestHeader("Authorization") String key,
+            @PathVariable Long productId) {
+        Long userId = jwtService.extractUserIdFromToken(key);
+        orderService.removeProductFromUserPendingOrders(userId, productId);
+        return ResponseEntity.ok().build();
+    }
 }

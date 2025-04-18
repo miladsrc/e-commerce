@@ -1,4 +1,4 @@
-package com.example.bussinessshope.shared.exception;
+package com.example.bussinessshope.shared.exception.specified;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,5 +1,6 @@
 package com.example.bussinessshope.shared.exception;
 
+import com.example.bussinessshope.shared.exception.specified.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

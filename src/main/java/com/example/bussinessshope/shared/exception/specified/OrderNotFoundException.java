@@ -1,4 +1,4 @@
-package com.example.bussinessshope.shared.exception;
+package com.example.bussinessshope.shared.exception.specified;
 
 public class OrderNotFoundException extends RuntimeException{
 

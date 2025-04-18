@@ -21,5 +21,4 @@ public interface BusinessRepository extends JpaRepository<BusinessEntity, Long >
     @Modifying
     @Query(value = "UPDATE business SET deleted = true WHERE id = :id", nativeQuery = true)
     void softDeleteBusinessEntityById(@Param("id") Long id);
-
 }

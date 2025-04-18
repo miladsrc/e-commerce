@@ -18,17 +18,27 @@ public class SwaggerConfig {
     @Bean
     public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group("public")
+                .group("auth")
                 .pathsToMatch("/api/auth", "/api/auth/**")
                 .build();
     }
 
     @Bean
-    public GroupedOpenApi privateApi() {
+    public GroupedOpenApi customerApi() {
         return GroupedOpenApi.builder()
-                .group("secure")
+                .group("customer")
                 .pathsToMatch("/api/**")
-                .pathsToExclude("/api/auth/**")
+                .pathsToExclude("/api/auth/**", "/api/business/**", "/api/product/**")
+                .addOperationCustomizer(this::addSecurityRequirement)
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi sellerApi() {
+        return GroupedOpenApi.builder()
+                .group("seller")
+                .pathsToMatch("/api/**")
+                .pathsToExclude("/api/auth/**", "/api/order/**")
                 .addOperationCustomizer(this::addSecurityRequirement)
                 .build();
     }

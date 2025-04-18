@@ -8,9 +8,9 @@ import com.example.bussinessshope.product.entity.ProductEntity;
 import com.example.bussinessshope.product.repository.ProductRepository;
 import com.example.bussinessshope.shared.entity.Situation;
 import com.example.bussinessshope.shared.entity.Transaction;
-import com.example.bussinessshope.shared.exception.InsufficientProductStockException;
-import com.example.bussinessshope.shared.exception.OrderNotFoundException;
-import com.example.bussinessshope.shared.exception.ProductNotFoundException;
+import com.example.bussinessshope.shared.exception.specified.InsufficientProductStockException;
+import com.example.bussinessshope.shared.exception.specified.OrderNotFoundException;
+import com.example.bussinessshope.shared.exception.specified.ProductNotFoundException;
 import com.example.bussinessshope.user.entity.UserEntity;
 import com.example.bussinessshope.user.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -40,7 +40,6 @@ public class OrderService {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
     }
-
 
     @Transactional
     public OrderResponseDto getCurrentOrder(Long userId) {
@@ -94,7 +93,6 @@ public class OrderService {
         return modelMapper.map(order, OrderResponseDto.class);
     }
 
-
     @Transactional
     public OrderResponseDto finalizeOrder(Long userId) {
         OrderEntity order = orderRepository.findByUserIdAndSituation(userId, Situation.PENDING)
@@ -110,6 +108,10 @@ public class OrderService {
                 .stream()
                 .map(order -> modelMapper.map(order, OrderResponseDto.class))
                 .collect(Collectors.toList());
+    }
+
+    public void removeProductFromUserPendingOrders(Long userId, Long productId) {
+        orderRepository.deleteProductFromUserPendingOrders(userId, productId);
     }
 
 }

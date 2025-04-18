@@ -8,7 +8,6 @@ import com.example.bussinessshope.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,8 +18,6 @@ public class BaseUserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    @Transactional
-
     public List<UserResponseDTO> getAllUsers() {
         return userRepository
                 .findAll()
@@ -29,7 +26,6 @@ public class BaseUserService {
                 .toList();
     }
 
-    @Transactional
     public UserResponseDTO getUserById(Long id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("UserEntity with ID " + id + " not found"));
@@ -111,5 +107,4 @@ public class BaseUserService {
                 .role(userEntity.getRole())
                 .build();
     }
-
 }

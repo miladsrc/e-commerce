@@ -5,15 +5,13 @@ import com.example.bussinessshope.business.repository.BusinessRepository;
 import com.example.bussinessshope.product.dto.*;
 import com.example.bussinessshope.product.entity.ProductEntity;
 import com.example.bussinessshope.product.repository.ProductRepository;
-import com.example.bussinessshope.shared.exception.UnauthorizedException;
+import com.example.bussinessshope.shared.exception.specified.UnauthorizedException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ProductService {

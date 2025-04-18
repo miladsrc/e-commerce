@@ -1,4 +1,4 @@
-package com.example.bussinessshope.shared.exception;
+package com.example.bussinessshope.shared.exception.specified;
 
 import java.time.LocalDateTime;
 import java.util.Map;
